@@ -2,6 +2,7 @@ using CustomerCase.Functions.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CustomerCase.Functions.Publishers.Customer;
 
@@ -11,11 +12,13 @@ public class PublishCustomerFunction
 
     private readonly IPublishCustomerRepository _repository;
     private readonly ILogger<PublishCustomerFunction> _logger;
+    private readonly IOptions<JsonSerializerOptions> _jsonOptions;
 
-    public PublishCustomerFunction(IPublishCustomerRepository repository, ILogger<PublishCustomerFunction> logger)
+    public PublishCustomerFunction(IPublishCustomerRepository repository, ILogger<PublishCustomerFunction> logger, IOptions<JsonSerializerOptions> jsonOptions)
     {
         _repository = repository;
         _logger = logger;
+        _jsonOptions = jsonOptions;
     }
 
     [Function(FunctionName)]
@@ -32,7 +35,8 @@ public class PublishCustomerFunction
 
         _logger.LogInformation("Received customer {Action} request", action);
 
-        
+        var requestData = await JsonSerializer.DeserializeAsync<CustomerPublisherModel>(req.Body, _jsonOptions.Value);
+        _logger.LogInformation(requestData.Phone);
 
         // _repository.PublishCustomerAsync()
         throw new NotImplementedException();
