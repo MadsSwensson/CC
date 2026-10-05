@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/SolutionItems/">
+    <File Path=".gitignore" />
+    <File Path="docker-compose.yml" />
+    <File Path="NuGet.Config" />
+    <File Path="README.md" />
+    <File Path="requests.http" />
+  </Folder>
+  <Project Path="Configuration/Configuration.csproj" />
+  <Project Path="CustomerCase.Functions.Test/CustomerCase.Functions.Test.csproj" />
+  <Project Path="CustomerCase.Functions/CustomerCase.Functions.csproj" />
+  <Project Path="Infrastructure/Infrastructure.csproj" />
+</Solution>

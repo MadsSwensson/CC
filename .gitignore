@@ -1,0 +1,24 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstats
+*.userprefs
+
+## Azure Functions
+local.settings.json
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*~
+
+## OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

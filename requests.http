@@ -1,0 +1,50 @@
+### Publish a new order
+POST http://localhost:7071/api/orders
+Content-Type: application/json
+
+{
+    "customerName": "Jane Smith",
+    "product": "Standing Desk",
+    "quantity": 2,
+    "unitPrice": 499.95
+}
+
+### Publish another order
+POST http://localhost:7071/api/orders
+Content-Type: application/json
+
+{
+    "customerName": "John Doe",
+    "product": "Ergonomic Chair",
+    "quantity": 1,
+    "unitPrice": 349.00
+}
+
+###
+
+### Create a new customer
+POST http://localhost:7071/api/customers/create
+Content-Type: application/json
+
+{
+    "customerId": "new-customer-001",
+    "firstName": "Mikkel",
+    "lastName": "Andersen",
+    "email": "mikkel.andersen@email.dk",
+    "phone": "+45 55667788",
+    "street": "Vesterbrogade 10",
+    "city": "Copenhagen",
+    "zipCode": "1620",
+    "country": "Denmark",
+    "status": "Active"
+}
+
+### Update a customer (partial update — only provided fields are applied)
+POST http://localhost:7071/api/customers/update
+Content-Type: application/json
+
+{
+    "customerId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "email": "anna.jensen@newdomain.dk",
+    "phone": "+45 99887766"
+}

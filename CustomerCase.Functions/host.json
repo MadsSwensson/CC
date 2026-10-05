@@ -1,0 +1,9 @@
+{
+  "version": "2.0",
+  "extensions": {
+    "serviceBus": {
+      "prefetchCount": 1,
+      "autoCompleteMessages": false
+    }
+  }
+}
