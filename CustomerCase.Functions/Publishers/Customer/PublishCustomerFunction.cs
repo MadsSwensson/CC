@@ -1,8 +1,7 @@
-using CustomerCase.Functions.Models;
+using CustomerCase.Functions.Serialization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace CustomerCase.Functions.Publishers.Customer;
 
@@ -12,14 +11,14 @@ public class PublishCustomerFunction
 
     private readonly IPublishCustomerRepository _repository;
     private readonly ILogger<PublishCustomerFunction> _logger;
-    private readonly IOptions<JsonSerializerOptions> _jsonOptions;
+    private readonly IAppJsonSerializer _serializer;
 
     public PublishCustomerFunction(IPublishCustomerRepository repository, ILogger<PublishCustomerFunction> logger,
-        IOptions<JsonSerializerOptions> jsonOptions)
+        IAppJsonSerializer serializer)
     {
         _repository = repository;
         _logger = logger;
-        _jsonOptions = jsonOptions;
+        _serializer = serializer;
     }
 
     [Function(FunctionName)]
@@ -36,14 +35,14 @@ public class PublishCustomerFunction
         
         _logger.LogInformation("Received customer '{Action}' request", action);
 
-        var requestData = await JsonSerializer.DeserializeAsync<CustomerPublisherModel>(req.Body, _jsonOptions.Value);
+        var requestData = await _serializer.DeserializeAsync<CustomerPublisherModel>(req.Body);
         if (requestData == null || string.IsNullOrWhiteSpace(requestData.CustomerId))
         {
             _logger.LogError("Received customer '{Action}' request without a valid customerId", action);
             return req.CreateResponse(HttpStatusCode.BadRequest);
         }
 
-        if (!Enum.TryParse(action, out EventType eventType))
+        if (!Enum.TryParse(action, ignoreCase: true, out EventType eventType))
         {
             _logger.LogError("Received action '{Action}' for unknown event {EventType}", action, eventType);
             return req.CreateResponse(HttpStatusCode.BadRequest);

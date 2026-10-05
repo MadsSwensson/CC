@@ -12,12 +12,6 @@ public class LowerCaseNamingPolicy : JsonNamingPolicy
 
         var lowerInvariant = char.ToLowerInvariant(name[0]) + name[1..];
 
-        var loggerFactory = LoggerFactory.Create(x =>
-        {
-            ILoggingBuilder loggingBuilder = x;
-        });
-        var logger = loggerFactory.CreateLogger("");
-        logger.LogInformation(lowerInvariant);
         return lowerInvariant;
     }
 }
