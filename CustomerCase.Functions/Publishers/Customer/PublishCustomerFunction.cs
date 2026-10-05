@@ -35,20 +35,35 @@ public class PublishCustomerFunction
         
         _logger.LogInformation("Received customer '{Action}' request", action);
 
-        var requestData = await _serializer.DeserializeAsync<CustomerPublisherModel>(req.Body);
+        CustomerPublisherModel? requestData;
+        try
+        {
+            requestData = await _serializer.DeserializeAsync<CustomerPublisherModel>(req.Body);
+        }
+        catch (JsonException e)
+        {
+            _logger.LogWarning(e,"Received customer '{Action}' request with invalid customer data", action);
+            return req.CreateResponse(HttpStatusCode.BadRequest);
+        }
+        
         if (requestData == null || string.IsNullOrWhiteSpace(requestData.CustomerId))
         {
-            _logger.LogError("Received customer '{Action}' request without a valid customerId", action);
+            _logger.LogWarning("Received customer '{Action}' request without a valid customerId", action);
             return req.CreateResponse(HttpStatusCode.BadRequest);
         }
 
         if (!Enum.TryParse(action, ignoreCase: true, out EventType eventType))
         {
-            _logger.LogError("Received action '{Action}' for unknown event {EventType}", action, eventType);
+            _logger.LogWarning("Received action '{Action}' for unknown event {EventType}", action, eventType);
             return req.CreateResponse(HttpStatusCode.BadRequest);
         }
 
-
+        if (eventType == EventType.Delete)
+        {
+            _logger.LogError("Received action '{Action}' for deleting customer event. Not yet supported.", action);
+            return req.CreateResponse(HttpStatusCode.NotImplemented);
+        }
+        
         await _repository.PublishCustomerAsync(requestData, eventType, correlationId);
         return req.CreateResponse(HttpStatusCode.OK);
     }
