@@ -70,7 +70,7 @@ public class PublishCustomerRepository : IPublishCustomerRepository
         return messageBody;
     }
 
-    private static List<string> GetChangedFields(CustomerPublisherModel message)
+    public static List<string> GetChangedFields(CustomerPublisherModel message)
     {
         return typeof(CustomerPublisherModel).GetProperties()
             .Where(p => p.Name != nameof(CustomerPublisherModel.CustomerId)

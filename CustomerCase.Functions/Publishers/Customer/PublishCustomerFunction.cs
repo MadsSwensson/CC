@@ -52,19 +52,14 @@ public class PublishCustomerFunction
             return req.CreateResponse(HttpStatusCode.BadRequest);
         }
 
-        if (!Enum.TryParse(action, ignoreCase: true, out EventType eventType))
+        if (!Enum.TryParse(action, ignoreCase: true, out EventType eventType) ||
+            eventType is not (EventType.Create or EventType.Update))
         {
-            _logger.LogWarning("Received action '{Action}' for unknown event {EventType}", action, eventType);
+            _logger.LogWarning("Received unsupported customer action '{Action}'", action);
             return req.CreateResponse(HttpStatusCode.BadRequest);
         }
 
-        if (eventType == EventType.Delete)
-        {
-            _logger.LogError("Received action '{Action}' for deleting customer event. Not yet supported.", action);
-            return req.CreateResponse(HttpStatusCode.NotImplemented);
-        }
-        
-        await _repository.PublishCustomerAsync(requestData, eventType, correlationId);
-        return req.CreateResponse(HttpStatusCode.OK);
+        var result = await _repository.PublishCustomerAsync(requestData, eventType, correlationId);
+        return req.CreateResponse(result.StatusCode);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Text.Json.Serialization;
 
 namespace CustomerCase.Functions.Serialization;
 
@@ -9,15 +9,21 @@ public interface IAppJsonSerializer
     ValueTask<T?> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default);
 }
 
-public sealed class AppJsonSerializer(IOptions<JsonSerializerOptions> options)
-    : IAppJsonSerializer
+public sealed class AppJsonSerializer : IAppJsonSerializer
 {
     public string Serialize<T>(T value) =>
-        JsonSerializer.Serialize(value, options.Value);
+        JsonSerializer.Serialize(value, _options);
 
     public ValueTask<T?> DeserializeAsync<T>(
         Stream stream,
         CancellationToken cancellationToken = default) =>
         JsonSerializer.DeserializeAsync<T>(
-            stream, options.Value, cancellationToken);
+            stream, _options, cancellationToken);
+
+    private readonly JsonSerializerOptions _options = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+        Converters = { new JsonStringEnumConverter() }
+    };
 }
