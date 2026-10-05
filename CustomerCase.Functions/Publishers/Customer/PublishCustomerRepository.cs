@@ -22,7 +22,9 @@ public class PublishCustomerRepository : IPublishCustomerRepository
     }
 
     public async Task<FunctionResponseModel> PublishCustomerAsync(
-        CustomerPublisherModel message, EventType eventType, Guid correlationId)
+        CustomerPublisherModel message, 
+        EventType eventType,
+        Guid correlationId)
     {
         throw new NotImplementedException();
     }
