@@ -9,6 +9,16 @@ public interface IPublishCustomerRepository
     Task<FunctionResponseModel> PublishCustomerAsync(CustomerPublisherModel message, EventType eventType, Guid correlationId);
 }
 
+/// <summary>
+/// Wraps a customer in a <see cref="MessageBody{T}"/> envelope and writes it to the website--customer topic.
+/// <list type="bullet">
+/// <item>The envelope carries the event type, timestamp, entity name/source and the caller's correlationId.</item>
+/// <item><c>ChangedFields</c> lists the non-null fields (excluding <c>CustomerId</c>), so the subscriber knows
+/// which fields an update sets.</item>
+/// <item>Published: 202 Accepted.</item>
+/// <item><see cref="ServiceBusException"/>: 503 Service Unavailable with the failure reason; other exceptions propagate.</item>
+/// </list>
+/// </summary>
 public class PublishCustomerRepository : IPublishCustomerRepository
 {
     private readonly IServiceBusRepository _serviceBusRepository;
@@ -70,6 +80,7 @@ public class PublishCustomerRepository : IPublishCustomerRepository
         return messageBody;
     }
 
+    /// <summary>Names of the non-null properties, in declaration order, excluding <c>CustomerId</c>.</summary>
     public static List<string> GetChangedFields(CustomerPublisherModel message)
     {
         return typeof(CustomerPublisherModel).GetProperties()

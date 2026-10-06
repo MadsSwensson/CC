@@ -5,6 +5,17 @@ using Microsoft.Extensions.Logging;
 
 namespace CustomerCase.Functions.Publishers.Customer;
 
+/// <summary>
+/// Accepts customer create/update requests on <c>POST /api/customers/{action}</c> and publishes them
+/// to the website--customer topic. Each request gets a new correlationId, which travels with the message
+/// so publisher and subscriber logs can be tied together.
+/// <list type="bullet">
+/// <item><c>action</c> is <c>create</c> or <c>update</c> (case-insensitive); anything else: 400.</item>
+/// <item>Invalid JSON, empty body or missing/blank <c>customerId</c>: 400, nothing is published.</item>
+/// <item>Published: the repository's status is returned (202 Accepted).</item>
+/// <item>Service Bus unavailable: the repository's status is returned (503), so the caller can retry.</item>
+/// </list>
+/// </summary>
 public class PublishCustomerFunction
 {
     private const string FunctionName = "Publisher-Customer";
