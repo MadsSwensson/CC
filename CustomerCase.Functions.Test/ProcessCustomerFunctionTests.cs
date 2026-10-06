@@ -1,7 +1,6 @@
 using System.Net;
 using Azure.Messaging.ServiceBus;
 using CustomerCase.Functions.Models;
-using CustomerCase.Functions.Serialization;
 using CustomerCase.Functions.Subscribers.Customer;
 using Infrastructure.Factories;
 using Infrastructure.Models;
@@ -19,10 +18,7 @@ public class ProcessCustomerFunctionTests
 
     public ProcessCustomerFunctionTests()
     {
-        _function = new ProcessCustomerFunction(
-            _repository.Object,
-            new AppJsonSerializer(),
-            Mock.Of<ILogger<ProcessCustomerFunction>>());
+        _function = new ProcessCustomerFunction(_repository.Object, Mock.Of<ILogger<ProcessCustomerFunction>>());
     }
 
     [Fact]
@@ -194,7 +190,7 @@ public class ProcessCustomerFunctionTests
 
     private static ServiceBusReceivedMessage CustomerMessage(EventType eventType, int deliveryCount = 1)
     {
-        var outgoing = new MessageFactory().CreateMessage(new MessageBody<CustomerPublisherModel>
+        var outgoing = MessageFactory.CreateMessage(new MessageBody<CustomerPublisherModel>
         {
             EventType = eventType,
             EntityName = "customer",

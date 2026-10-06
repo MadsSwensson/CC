@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Azure.Messaging.ServiceBus;
-using CustomerCase.Functions.Serialization;
+using Infrastructure.Serialization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -24,16 +24,12 @@ public class ProcessCustomerFunction
     private const string Subscription = Constants.ServiceBus.Subscriptions.CustomerProcessor;
 
     private readonly IProcessCustomerRepository _repository;
-    private readonly IAppJsonSerializer _serializer;
+    
     private readonly ILogger<ProcessCustomerFunction> _logger;
 
-    public ProcessCustomerFunction(
-        IProcessCustomerRepository repository,
-        IAppJsonSerializer serializer,
-        ILogger<ProcessCustomerFunction> logger)
+    public ProcessCustomerFunction(IProcessCustomerRepository repository, ILogger<ProcessCustomerFunction> logger)
     {
         _repository = repository;
-        _serializer = serializer;
         _logger = logger;
     }
 
@@ -43,9 +39,15 @@ public class ProcessCustomerFunction
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions)
     {
-        using var scope = _logger.BeginScope(
-            "CorrelationId={CorrelationId} FunctionName={FunctionName} Topic={Topic} Subscription={Subscription}",
-            message.CorrelationId, FunctionName, Topic, Subscription);
+        var correlationId = Guid.TryParse(message.CorrelationId, out var id) ? id : Guid.NewGuid();
+
+        using var scope = _logger.BeginScope(new Dictionary<string, object>
+        {
+            ["CorrelationId"] = correlationId,
+            ["FunctionName"] = FunctionName,
+            ["Topic"] = Topic,
+            ["Subscription"] = Subscription
+        });
 
         if (!TryRead(message, out var body, out var invalidReason))
         {
@@ -96,7 +98,7 @@ public class ProcessCustomerFunction
         body = null;
         try
         {
-            body = _serializer.Deserialize<MessageBody<CustomerPublisherModel>>(message.Body);
+            body = SharedJsonSerializer.Deserialize<MessageBody<CustomerPublisherModel>>(message.Body);
         }
         catch (JsonException ex)
         {
@@ -149,7 +151,7 @@ public class ProcessCustomerFunction
     {
         _logger.LogWarning(
             exception,
-            "Customer message failed on attempt {DeliveryCount}; abandoning for retry", 
+            "Customer message failed on attempt {DeliveryCount}; abandoning for retry",
             message.DeliveryCount);
         try
         {

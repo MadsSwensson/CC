@@ -2,7 +2,6 @@ using System.Net;
 using System.Text;
 using CustomerCase.Functions.Models;
 using CustomerCase.Functions.Publishers.Customer;
-using CustomerCase.Functions.Serialization;
 using Infrastructure.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -18,10 +17,7 @@ public class PublishCustomerFunctionTests
 
     public PublishCustomerFunctionTests()
     {
-        _function = new PublishCustomerFunction(
-            _repository.Object,
-            Mock.Of<ILogger<PublishCustomerFunction>>(),
-            new AppJsonSerializer());
+        _function = new PublishCustomerFunction(_repository.Object, Mock.Of<ILogger<PublishCustomerFunction>>());
     }
 
     [Theory]

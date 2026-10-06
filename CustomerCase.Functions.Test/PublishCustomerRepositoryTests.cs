@@ -2,7 +2,6 @@ using System.Net;
 using Azure.Messaging.ServiceBus;
 using CustomerCase.Functions.Models;
 using CustomerCase.Functions.Publishers.Customer;
-using CustomerCase.Functions.Serialization;
 using Infrastructure.Models;
 using Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
@@ -17,10 +16,7 @@ public class PublishCustomerRepositoryTests
 
     public PublishCustomerRepositoryTests()
     {
-        var serializer = new Mock<IAppJsonSerializer>();
-        serializer.Setup(s => s.Serialize(It.IsAny<MessageBody<CustomerPublisherModel>>())).Returns("{}");
-        _repository = new PublishCustomerRepository(
-            _serviceBus.Object, Mock.Of<ILogger<PublishCustomerRepository>>(), serializer.Object);
+        _repository = new PublishCustomerRepository(_serviceBus.Object, Mock.Of<ILogger<PublishCustomerRepository>>());
     }
 
     [Fact]

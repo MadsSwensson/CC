@@ -1,4 +1,3 @@
-using CustomerCase.Functions.Data;
 using CustomerCase.Functions.Subscribers.Customer;
 using Microsoft.Extensions.DependencyInjection;
 

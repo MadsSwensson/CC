@@ -1,20 +1,14 @@
-using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Infrastructure.Models;
+using Infrastructure.Serialization;
 
 namespace Infrastructure.Factories;
 
-public class MessageFactory
+public static class MessageFactory
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new()
+    public static ServiceBusMessage CreateMessage<T>(MessageBody<T> messageBody)
     {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
-    public ServiceBusMessage CreateMessage<T>(MessageBody<T> messageBody)
-    {
-        var json = JsonSerializer.Serialize(messageBody, SerializerOptions);
+        var json = SharedJsonSerializer.Serialize(messageBody);
 
         var message = new ServiceBusMessage(json)
         {

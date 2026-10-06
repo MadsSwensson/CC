@@ -1,4 +1,4 @@
-using CustomerCase.Functions.Serialization;
+using Infrastructure.Serialization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -22,14 +22,11 @@ public class PublishCustomerFunction
 
     private readonly IPublishCustomerRepository _repository;
     private readonly ILogger<PublishCustomerFunction> _logger;
-    private readonly IAppJsonSerializer _serializer;
 
-    public PublishCustomerFunction(IPublishCustomerRepository repository, ILogger<PublishCustomerFunction> logger,
-        IAppJsonSerializer serializer)
+    public PublishCustomerFunction(IPublishCustomerRepository repository, ILogger<PublishCustomerFunction> logger)
     {
         _repository = repository;
         _logger = logger;
-        _serializer = serializer;
     }
 
     [Function(FunctionName)]
@@ -49,7 +46,7 @@ public class PublishCustomerFunction
         CustomerPublisherModel? requestData;
         try
         {
-            requestData = await _serializer.DeserializeAsync<CustomerPublisherModel>(req.Body);
+            requestData = await SharedJsonSerializer.DeserializeAsync<CustomerPublisherModel>(req.Body);
         }
         catch (JsonException e)
         {

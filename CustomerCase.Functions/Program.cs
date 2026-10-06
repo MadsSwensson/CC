@@ -11,7 +11,6 @@ var host = new HostBuilder()
     })
     .ConfigureServices((context, services) =>
     {
-        services.AddSerializationServices();
         services.AddInfrastructureServices(context.Configuration);
         services.AddPublisherServices();
         services.AddSubscriberServices();

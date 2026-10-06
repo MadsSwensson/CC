@@ -1,5 +1,4 @@
 using Azure.Messaging.ServiceBus;
-using CustomerCase.Functions.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace CustomerCase.Functions.Publishers.Customer;
@@ -23,16 +22,11 @@ public class PublishCustomerRepository : IPublishCustomerRepository
 {
     private readonly IServiceBusRepository _serviceBusRepository;
     private readonly ILogger<PublishCustomerRepository> _logger;
-    private readonly IAppJsonSerializer _serializer;
 
-    public PublishCustomerRepository(
-        IServiceBusRepository serviceBusRepository,
-        ILogger<PublishCustomerRepository> logger,
-        IAppJsonSerializer serializer)
+    public PublishCustomerRepository(IServiceBusRepository serviceBusRepository, ILogger<PublishCustomerRepository> logger)
     {
         _serviceBusRepository = serviceBusRepository;
         _logger = logger;
-        _serializer = serializer;
     }
 
     public async Task<FunctionResponseModel> PublishCustomerAsync(CustomerPublisherModel message, EventType eventType, Guid correlationId)
@@ -42,7 +36,8 @@ public class PublishCustomerRepository : IPublishCustomerRepository
         try
         {
             await _serviceBusRepository.WriteToTopic(messageBody);
-            _logger.LogInformation($"Published Customer: {_serializer.Serialize(messageBody)}");
+            _logger.LogInformation("Published Customer {CustomerId}", message.CustomerId);
+            
             return new FunctionResponseModel
             {
                 StatusCode = HttpStatusCode.Accepted,

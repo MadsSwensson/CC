@@ -14,23 +14,20 @@ public interface IServiceBusRepository
 public class ServiceBusRepository : IServiceBusRepository
 {
     private readonly ServiceBusSenderProvider _senderProvider;
-    private readonly MessageFactory _messageFactory;
     private readonly ILogger<ServiceBusRepository> _logger;
 
     public ServiceBusRepository(
         ServiceBusSenderProvider senderProvider,
-        MessageFactory messageFactory,
         ILogger<ServiceBusRepository> logger)
     {
         _senderProvider = senderProvider;
-        _messageFactory = messageFactory;
         _logger = logger;
     }
 
     public async Task WriteToTopic<T>(MessageBody<T> messageBody)
     {
         var sender = _senderProvider.GetSender(messageBody.Topic);
-        var message = _messageFactory.CreateMessage(messageBody);
+        var message = MessageFactory.CreateMessage(messageBody);
         await sender.SendMessageAsync(message);
 
         _logger.LogInformation(
