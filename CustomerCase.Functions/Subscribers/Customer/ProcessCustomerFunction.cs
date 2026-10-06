@@ -63,7 +63,11 @@ public class ProcessCustomerFunction
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            await RetryAsync(message, messageActions, ex);
+            _logger.LogWarning(
+                ex,
+                "Customer message failed on attempt {DeliveryCount}; abandoning for retry",
+                message.DeliveryCount);
+            await RetryAsync(message, messageActions);
             throw;
         }
 
@@ -83,10 +87,11 @@ public class ProcessCustomerFunction
                 break;
 
             default:
-                var failure = new InvalidOperationException(
-                    $"Customer {body.EventType} failed with status {(int)status}.");
-                await RetryAsync(message, messageActions, failure);
-                throw failure;
+                _logger.LogWarning(
+                    "Customer message failed on attempt {DeliveryCount}; abandoning for retry",
+                    message.DeliveryCount);
+                await RetryAsync(message, messageActions);
+                return;
         }
     }
 
@@ -146,13 +151,9 @@ public class ProcessCustomerFunction
 
     private async Task RetryAsync(
         ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions,
-        Exception exception)
+        ServiceBusMessageActions messageActions)
     {
-        _logger.LogWarning(
-            exception,
-            "Customer message failed on attempt {DeliveryCount}; abandoning for retry",
-            message.DeliveryCount);
+
         try
         {
             await messageActions.AbandonMessageAsync(message);

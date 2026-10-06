@@ -37,9 +37,11 @@ public class PublishCustomerFunction
     {
         var correlationId = Guid.NewGuid();
 
-        using var scope = _logger.BeginScope(
-            "CorrelationId={CorrelationId} FunctionName={FunctionName}",
-            correlationId, FunctionName);
+        using var scope = _logger.BeginScope(new Dictionary<string, object>
+        {
+            ["CorrelationId"] = correlationId,
+            ["FunctionName"] = FunctionName
+        });
         
         _logger.LogInformation("Received customer '{Action}' request", action);
 
